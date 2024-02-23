@@ -1,11 +1,12 @@
 import requests
 from dotenv import load_dotenv
 import os
+import pytz
 
 import random
 import schedule
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from get_joke import get_joke
 
 
@@ -50,7 +51,7 @@ def bromita(night: bool = False):
         try:
             response = requests.post(API_ENDPOINT, headers=headers, json=message)
             if response.status_code == 200:
-                print("ok")
+                print("Bromita delivered :3")
                 return
         except Exception as error:
             print(f"\nError en attemp {attemp}: {error}")
@@ -61,26 +62,38 @@ def bromita(night: bool = False):
 
 def schedule_tasks():
 
+    # Defines the timezone for the reciever phone:
+    local_timezone = pytz.timezone("America/Mexico_City")
+    print("\nDaily schedule:", datetime.now().strftime("%d/%m/%Y"))
+
     # Schedule the morning bromita (Between 8:00am and 1:00pm):
-    morning_hour = random.randint(8, 12)
+    morning_hour = random.randint(8, 13)
     morning_minute = random.randint(0, 59)
-    morning_time = f"{morning_hour:02d}:{morning_minute:02d}"
-    print(morning_time)
-    schedule.every().day.at(morning_time).do(bromita)
+    morning_time = local_timezone.localize(datetime(datetime.now().year, datetime.now().month, datetime.now().day, morning_hour, morning_minute))
+    print(" - Morning bromita:", morning_time.strftime("%H:%M"))
+    schedule.every().day.at(morning_time.strftime("%H:%M")).do(bromita)
 
     # Schedule the night bromita (Between 6:00pm and 11:00pm):
-    night_hour = random.randint(18, 22)
+    night_hour = random.randint(18, 23)
     night_minute = random.randint(0, 59)
-    night_time = f"{night_hour:02d}:{night_minute:02d}"
-    print(night_time)
-    schedule.every().day.at(night_time).do(bromita, night=True)
+    night_time = local_timezone.localize(datetime(datetime.now().year, datetime.now().month, datetime.now().day, night_hour, night_minute))
+    print(" - Night bromita:", night_time.strftime("%H:%M"))
+    schedule.every().day.at(night_time.strftime("%H:%M")).do(bromita, night=True)
 
 
 #? Main Point :3
 if __name__ == "__main__":
 
-    # Everyday at 00:00am it schedules a random hour to bromitas:
-    schedule.every().day.at("00:00").do(schedule_tasks)
+    # Application running signal:
+    print("Application running")
+    print(datetime.now().strftime("%d/%m/%Y %H:%M:%S"))
+
+    # Defines the timezone for the reciever phone:
+    local_timezone = pytz.timezone("America/Mexico_City")
+
+    # Everyday at 6:00am it schedules a random hour to bromitas:
+    scheduled_time = local_timezone.localize(datetime(datetime.now().year, datetime.now().month, datetime.now().day, 6, 0))
+    schedule.every().day.at(scheduled_time.strftime("%H:%M")).do(schedule_tasks)
 
     # For eternity do:
     while True:
