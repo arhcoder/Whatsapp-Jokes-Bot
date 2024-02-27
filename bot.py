@@ -52,12 +52,14 @@ def bromita(night: bool = False):
             response = requests.post(API_ENDPOINT, headers=headers, json=message)
             if response.status_code == 200:
                 print("Bromita delivered :3")
+                schedule.CancelJob
                 return
         except Exception as error:
             print(f"\nError en attemp {attemp}: {error}")
             print(response.text)
         time.sleep(4)
     print("Bromita not succed :c")
+    schedule.CancelJob
 
 
 def schedule_tasks():
